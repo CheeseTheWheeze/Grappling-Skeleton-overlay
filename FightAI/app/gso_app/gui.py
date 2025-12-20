@@ -9,9 +9,10 @@ from tkinter import BooleanVar, StringVar, Tk, messagebox
 from tkinter import filedialog, ttk
 
 from gso_app.cli import analyze_video
+from gso_app.paths import resolve_config_path
 
 
-DEFAULT_CONFIG_PATH = Path.home() / ".config" / "gso" / "config.json"
+DEFAULT_CONFIG_PATH = resolve_config_path()
 
 
 @dataclass
