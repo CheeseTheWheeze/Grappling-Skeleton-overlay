@@ -56,3 +56,17 @@ gso analyze --input /path/to/video.mp4 --output ./artifacts
 
 The command will create `analysis.json`, `summary.txt`, and `metrics.json` in the
 output directory as placeholder analysis artifacts.
+
+### GUI flow
+
+Launch the GUI to configure inputs and artifact options:
+
+```bash
+gso gui
+```
+
+You can optionally point the GUI at a specific settings file:
+
+```bash
+gso gui --config ~/.config/gso/config.json
+```

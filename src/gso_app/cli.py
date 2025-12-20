@@ -44,32 +44,58 @@ def build_parser() -> argparse.ArgumentParser:
         default=installer.DEFAULT_CONFIG_DIR,
         help="Directory for configuration assets.",
     )
+
+    gui_parser = subparsers.add_parser(
+        "gui",
+        help="Launch the GUI for configuring and running analysis.",
+    )
+    gui_parser.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help="Path to the GUI configuration file.",
+    )
     return parser
 
 
-def analyze_video(input_path: Path, output_dir: Path) -> None:
+def analyze_video(
+    input_path: Path,
+    output_dir: Path,
+    *,
+    write_summary: bool = True,
+    write_metrics: bool = True,
+    write_analysis: bool = True,
+) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
+    artifacts: dict[str, str] = {}
+    if write_summary:
+        artifacts["summary"] = str(output_dir / "summary.txt")
+    if write_metrics:
+        artifacts["metrics"] = str(output_dir / "metrics.json")
+    if write_analysis:
+        artifacts["analysis"] = str(output_dir / "analysis.json")
+
     analysis_payload = {
         "input": str(input_path),
         "status": "queued",
-        "artifacts": {
-            "summary": str(output_dir / "summary.txt"),
-            "metrics": str(output_dir / "metrics.json"),
-        },
+        "artifacts": artifacts,
     }
 
-    (output_dir / "summary.txt").write_text(
-        "Analysis placeholder. Replace with real model output.\n",
-        encoding="utf-8",
-    )
-    (output_dir / "metrics.json").write_text(
-        json.dumps({"frames": 0, "detections": 0}, indent=2) + "\n",
-        encoding="utf-8",
-    )
-    (output_dir / "analysis.json").write_text(
-        json.dumps(analysis_payload, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    if write_summary:
+        (output_dir / "summary.txt").write_text(
+            "Analysis placeholder. Replace with real model output.\n",
+            encoding="utf-8",
+        )
+    if write_metrics:
+        (output_dir / "metrics.json").write_text(
+            json.dumps({"frames": 0, "detections": 0}, indent=2) + "\n",
+            encoding="utf-8",
+        )
+    if write_analysis:
+        (output_dir / "analysis.json").write_text(
+            json.dumps(analysis_payload, indent=2) + "\n",
+            encoding="utf-8",
+        )
 
 
 def run_install(requirements_path: Path, config_dir: Path) -> int:
@@ -105,6 +131,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         requirements_path = Path(args.requirements).expanduser().resolve()
         config_dir = Path(args.config_dir).expanduser().resolve()
         return run_install(requirements_path, config_dir)
+
+    if args.command == "gui":
+        from gso_app.gui import launch_gui
+
+        config_path = Path(args.config).expanduser().resolve() if args.config else None
+        return launch_gui(config_path=config_path)
 
     parser.error("No command provided.")
 
