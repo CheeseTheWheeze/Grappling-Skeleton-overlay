@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 
 [project.scripts]
+gso = "gso_app.cli:main"
 gso-analyze = "gso_app.cli:main"
 
 [tool.setuptools]

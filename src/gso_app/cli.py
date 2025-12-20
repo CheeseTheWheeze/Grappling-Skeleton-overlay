@@ -1,7 +1,10 @@
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Sequence
+
+from gso_app import installer
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -23,6 +26,23 @@ def build_parser() -> argparse.ArgumentParser:
         "--output",
         required=True,
         help="Directory to write analysis artifacts.",
+    )
+
+    install_parser = subparsers.add_parser(
+        "install",
+        help="Verify prerequisites and initialize local assets.",
+    )
+    install_parser.add_argument(
+        "--requirements",
+        type=Path,
+        default=installer.DEFAULT_REQUIREMENTS_PATH,
+        help="Path to requirements.txt to install.",
+    )
+    install_parser.add_argument(
+        "--config-dir",
+        type=Path,
+        default=installer.DEFAULT_CONFIG_DIR,
+        help="Directory for configuration assets.",
     )
     return parser
 
@@ -52,6 +72,23 @@ def analyze_video(input_path: Path, output_dir: Path) -> None:
     )
 
 
+def run_install(requirements_path: Path, config_dir: Path) -> int:
+    try:
+        print("Checking Python version...")
+        installer.verify_python_version()
+        print("Installing/verifying requirements...")
+        installer.install_requirements(requirements_path=requirements_path)
+        print("Initializing assets/configuration...")
+        final_config_dir = installer.initialize_assets(config_dir=config_dir)
+    except RuntimeError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
+    print("Installation complete.")
+    print(f"Configuration directory: {final_config_dir}")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -63,6 +100,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             parser.error(f"Input video not found: {input_path}")
         analyze_video(input_path, output_dir)
         return 0
+
+    if args.command == "install":
+        requirements_path = Path(args.requirements).expanduser().resolve()
+        config_dir = Path(args.config_dir).expanduser().resolve()
+        return run_install(requirements_path, config_dir)
 
     parser.error("No command provided.")
 
