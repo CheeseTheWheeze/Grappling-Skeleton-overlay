@@ -22,6 +22,8 @@ CREATE TABLE tracks (
   id UUID PRIMARY KEY,
   video_id UUID NOT NULL REFERENCES videos(id),
   profile_id UUID REFERENCES profiles(id),
+  subject_id TEXT,
+  partner_group_id TEXT,
   track_label TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -53,6 +55,7 @@ CREATE TABLE keypoints (
   y REAL NOT NULL,
   z REAL,
   confidence REAL NOT NULL,
+  visibility_score REAL,
   is_visible BOOLEAN NOT NULL DEFAULT TRUE,
   is_occluded BOOLEAN NOT NULL DEFAULT FALSE
 );
@@ -61,6 +64,8 @@ CREATE TABLE limbs (
   id UUID PRIMARY KEY,
   skeleton_id UUID NOT NULL REFERENCES skeletons(id),
   name TEXT NOT NULL,
+  limb_id TEXT,
+  limb_state TEXT,
   start_keypoint TEXT NOT NULL,
   end_keypoint TEXT NOT NULL,
   visibility_score REAL,
