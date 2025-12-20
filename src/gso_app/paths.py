@@ -7,23 +7,11 @@ from pathlib import Path
 DATA_ENV_VARS = ("FIGHTAI_DATA_DIR", "GSO_DATA_DIR")
 
 
-def _resolve_portable_data_dir() -> Path | None:
-    module_root = Path(__file__).resolve().parents[1]
-    portable_root = module_root.parent
-    candidate = portable_root / "FightAI_Data"
-    if candidate.exists() or (portable_root / "FightAI.exe").exists() or (portable_root / "FightAI.cmd").exists():
-        return candidate
-    return None
-
-
 def resolve_data_dir() -> Path:
     for env_var in DATA_ENV_VARS:
         value = os.environ.get(env_var)
         if value:
             return Path(value).expanduser()
-    portable_dir = _resolve_portable_data_dir()
-    if portable_dir is not None:
-        return portable_dir
     return Path.home() / ".config" / "gso"
 
 
