@@ -3,6 +3,9 @@
 CLI for importing videos, managing a processing queue, displaying analysis progress,
 and exporting summaries.
 
+This repo ships with a lightweight, simulated analysis flow so it runs immediately
+after download without any external model files.
+
 ## Setup
 
 ```bash
