@@ -1,21 +1,17 @@
 from __future__ import annotations
 
+import argparse
 import json
-import os
 import sys
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List
-
-import typer
+from typing import Any, List
 
 APP_DIR = Path.home() / ".gso"
 QUEUE_FILE = APP_DIR / "queue.json"
 SUMMARY_FILE = APP_DIR / "summaries.json"
-
-app = typer.Typer(add_completion=False, help="Grappling Skeleton Overlay CLI.")
 
 
 @dataclass
@@ -80,38 +76,35 @@ def _print_progress(label: str, progress: int, total: int) -> None:
         sys.stdout.write("\n")
 
 
-@app.command("import")
-def import_video(path: Path) -> None:
-    """Import a video file into the processing queue."""
+def _import_video(path: Path) -> int:
     if not path.exists():
-        raise typer.BadParameter(f"{path} does not exist.")
+        print(f"Error: {path} does not exist.", file=sys.stderr)
+        return 2
     _ensure_app_dir()
     queue = _load_queue()
     queue.append(QueueItem(path=str(path.resolve()), imported_at=_utc_now()))
     _save_queue(queue)
-    typer.echo(f"Queued {path.name}. Queue length: {len(queue)}")
+    print(f"Queued {path.name}. Queue length: {len(queue)}")
+    return 0
 
 
-@app.command()
-def queue() -> None:
-    """List queued video files."""
+def _show_queue() -> int:
     queue_items = _load_queue()
     if not queue_items:
-        typer.echo("Queue is empty.")
-        return
+        print("Queue is empty.")
+        return 0
     for idx, item in enumerate(queue_items, start=1):
-        typer.echo(f"{idx}. {item.path} (imported {item.imported_at})")
+        print(f"{idx}. {item.path} (imported {item.imported_at})")
+    return 0
 
 
-@app.command()
-def process() -> None:
-    """Process all queued video files."""
+def _process_queue() -> int:
     queue_items = _load_queue()
     if not queue_items:
-        typer.echo("Queue is empty.")
-        return
+        print("Queue is empty.")
+        return 0
     summaries = _load_summaries()
-    typer.echo(f"Processing {len(queue_items)} video(s)...")
+    print(f"Processing {len(queue_items)} video(s)...")
     while queue_items:
         item = queue_items.pop(0)
         path = Path(item.path)
@@ -128,34 +121,24 @@ def process() -> None:
             estimated_frames=max(1, file_size // 1024),
         )
         summaries.append(summary)
-        typer.echo(f"Completed analysis for {path.name}.")
+        print(f"Completed analysis for {path.name}.")
     _save_queue(queue_items)
     _save_summaries(summaries)
-    typer.echo("All queued videos processed.")
+    print("All queued videos processed.")
+    return 0
 
 
-@app.command()
-def export(
-    output: Path = typer.Option(
-        Path("analysis_summary.json"),
-        "--output",
-        "-o",
-        help="Output file path.",
-    ),
-    format: str = typer.Option("json", "--format", "-f", help="json or csv"),
-) -> None:
-    """Export analysis summaries."""
+def _export_summaries(output: Path, format: str) -> int:
     summaries = _load_summaries()
     if not summaries:
-        typer.echo("No summaries to export.")
-        return
+        print("No summaries to export.")
+        return 0
     output.parent.mkdir(parents=True, exist_ok=True)
-    if format.lower() == "json":
+    normalized = format.lower()
+    if normalized == "json":
         _save_json(output, [asdict(item) for item in summaries])
-    elif format.lower() == "csv":
-        lines = [
-            "path,file_size_bytes,imported_at,processed_at,estimated_frames"
-        ]
+    elif normalized == "csv":
+        lines = ["path,file_size_bytes,imported_at,processed_at,estimated_frames"]
         for item in summaries:
             lines.append(
                 f"{item.path},{item.file_size_bytes},{item.imported_at},"
@@ -163,13 +146,59 @@ def export(
             )
         output.write_text("\n".join(lines))
     else:
-        raise typer.BadParameter("Format must be json or csv.")
-    typer.echo(f"Exported {len(summaries)} summaries to {output}.")
+        print("Error: format must be json or csv.", file=sys.stderr)
+        return 2
+    print(f"Exported {len(summaries)} summaries to {output}.")
+    return 0
 
 
-def run() -> None:
-    app()
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Grappling Skeleton Overlay CLI.",
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    import_parser = subparsers.add_parser(
+        "import", help="Import a video file into the processing queue."
+    )
+    import_parser.add_argument("path", type=Path, help="Path to the video file.")
+
+    subparsers.add_parser("queue", help="List queued video files.")
+    subparsers.add_parser("process", help="Process all queued video files.")
+
+    export_parser = subparsers.add_parser("export", help="Export analysis summaries.")
+    export_parser.add_argument(
+        "--output",
+        "-o",
+        type=Path,
+        default=Path("analysis_summary.json"),
+        help="Output file path.",
+    )
+    export_parser.add_argument(
+        "--format",
+        "-f",
+        default="json",
+        help="json or csv",
+    )
+
+    return parser
+
+
+def main(argv: List[str] | None = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    if args.command == "import":
+        return _import_video(args.path)
+    if args.command == "queue":
+        return _show_queue()
+    if args.command == "process":
+        return _process_queue()
+    if args.command == "export":
+        return _export_summaries(args.output, args.format)
+
+    parser.error("No command provided.")
 
 
 if __name__ == "__main__":
-    run()
+    raise SystemExit(main())

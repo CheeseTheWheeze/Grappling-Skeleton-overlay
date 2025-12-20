@@ -1,72 +1,121 @@
 # Grappling-Skeleton-overlay
 
-CLI for importing videos, managing a processing queue, displaying analysis progress,
-and exporting summaries.
+A simple video-analysis tool with a friendly GUI. This guide is written so anyone can
+set it up and use it without technical experience.
 
-This repo ships with a lightweight, simulated analysis flow so it runs immediately
-after download without any external model files.
+---
 
-## Setup
+## Quick Start (recommended)
 
-```bash
-pip install -r requirements.txt
-```
+Follow these steps exactly. You only have to do this once.
 
-## Usage
+### 1) Download the project
 
-```bash
-python -m gso.cli import /path/to/video.mp4
-python -m gso.cli queue
-python -m gso.cli process
-python -m gso.cli export --format json --output analysis_summary.json
-```
+If you already have the folder on your computer, skip to step 2.
 
-## Application Skeleton Usage
+1. Open this GitHub page in your browser.
+2. Click **Code** ➜ **Download ZIP**.
+3. Unzip the download.
+4. Open the unzipped folder.
 
-Install the application skeleton in editable mode, then run the analyzer CLI:
+### 2) Install the app and create the Desktop icon
 
-```bash
-pip install -e .
-```
+1. Open a terminal:
+   - **Windows:** Start menu ➜ type **PowerShell** ➜ open it.
+   - **macOS:** Applications ➜ Utilities ➜ **Terminal**.
+   - **Linux:** Open **Terminal** from your apps.
+2. In the terminal, go to the project folder:
 
-### Installer flow
+   ```bash
+   cd /path/to/Grappling-Skeleton-overlay
+   ```
 
-Prerequisites:
-- Python 3.9+
-- `pip` available on your PATH
+   Tip: If you dragged the folder onto the terminal window, it will fill in the path for you.
 
-Run the installer to verify Python, install requirements, and create a local
-configuration directory:
+3. Run the installer (offline — no internet required):
 
-```bash
-gso install
-```
+   **Option A: click to install**
+   - **Windows:** double‑click `install_gso.bat`
+   - **macOS:** double‑click `install_gso.command`
+   - **Linux:** double‑click `install_gso.sh`
 
-You can also point at a custom `requirements.txt` or configuration directory:
+   **Option B: run from the terminal**
 
-```bash
-gso install --requirements ./requirements.txt --config-dir ~/.gso
-```
+   ```bash
+   python install_gso.py
+   ```
 
-### Analyze flow
+✅ You should now see a **GSO Analyzer** icon on your Desktop.
+
+---
+
+## Everyday Use (GUI)
+
+1. Double‑click **GSO Analyzer** on your Desktop.
+2. Click **Browse** and pick a video.
+3. Choose where you want the output files to go.
+4. Click **Run / Generate**.
+
+The app will create these files in your output folder:
+- `summary.txt`
+- `metrics.json`
+- `analysis.json`
+
+---
+
+## If the Desktop Icon Doesn’t Work
+
+1. Open a terminal in the project folder (see step 2 above).
+2. Run:
+
+   ```bash
+   gso install
+   ```
+
+This fixes missing or broken installs by re‑checking requirements and rebuilding the launcher.
+
+---
+
+## Optional: Command Line (advanced)
+
+Only use this if you are comfortable with the terminal.
+
+### Analyze a video directly
 
 ```bash
 gso analyze --input /path/to/video.mp4 --output ./artifacts
 ```
 
-The command will create `analysis.json`, `summary.txt`, and `metrics.json` in the
-output directory as placeholder analysis artifacts.
-
-### GUI flow
-
-Launch the GUI to configure inputs and artifact options:
+### Run the GUI without the desktop icon
 
 ```bash
 gso gui
 ```
 
-You can optionally point the GUI at a specific settings file:
+---
 
-```bash
-gso gui --config ~/.config/gso/config.json
-```
+## Troubleshooting
+
+**“gso: command not found”**
+- Run the installer again:
+
+  ```bash
+  python install_gso.py
+  ```
+
+**Python version errors**
+- You need Python **3.9 or newer**.
+
+**I want a clean reinstall**
+- Run this in the project folder:
+
+  ```bash
+  gso install
+  ```
+
+---
+
+## What gets created on your computer
+
+- A configuration folder: `~/.gso`
+- A Desktop launcher: **GSO Analyzer** (numbered versions are kept if you reinstall)
