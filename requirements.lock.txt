@@ -1,0 +1,2 @@
+# Pinned runtime dependencies for Windows portable build.
+# (No external packages required for the current offline GUI.)

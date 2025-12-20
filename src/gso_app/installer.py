@@ -7,8 +7,10 @@ import sys
 from pathlib import Path
 from typing import Iterable
 
+from gso_app.paths import resolve_data_dir
+
 DEFAULT_MIN_PYTHON = (3, 9)
-DEFAULT_CONFIG_DIR = Path.home() / ".gso"
+DEFAULT_CONFIG_DIR = resolve_data_dir()
 DEFAULT_REQUIREMENTS_PATH = Path(__file__).resolve().parents[2] / "requirements.txt"
 DEFAULT_DESKTOP_DIR = Path.home() / "Desktop"
 DEFAULT_DESKTOP_ENTRY_NAME = "GSO Analyzer"
