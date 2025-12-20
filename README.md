@@ -20,3 +20,15 @@ python -m gso.cli queue
 python -m gso.cli process
 python -m gso.cli export --format json --output analysis_summary.json
 ```
+
+## Application Skeleton Usage
+
+Install the application skeleton in editable mode, then run the analyzer CLI:
+
+```bash
+pip install -e .
+gso-analyze analyze --input /path/to/video.mp4 --output ./artifacts
+```
+
+The command will create `analysis.json`, `summary.txt`, and `metrics.json` in the
+output directory as placeholder analysis artifacts.
