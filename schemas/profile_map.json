@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Skeleton analysis export",
+  "type": "object",
+  "required": ["profiles", "partner_groups", "limb_tracks"],
+  "additionalProperties": false,
+  "properties": {
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["profile_id", "source_video_id", "track_id"],
+        "additionalProperties": false,
+        "properties": {
+          "profile_id": {"type": "string"},
+          "source_video_id": {"type": "string"},
+          "track_id": {"type": "string"},
+          "similarity": {"type": "number"},
+          "embedding": {
+            "type": "array",
+            "items": {"type": "number"}
+          }
+        }
+      }
+    },
+    "partner_groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["partner_group_id", "track_ids"],
+        "additionalProperties": false,
+        "properties": {
+          "partner_group_id": {"type": "string"},
+          "track_ids": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "metadata": {"type": "object"}
+        }
+      }
+    },
+    "limb_tracks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["limb_id", "track_id", "joint_names"],
+        "additionalProperties": false,
+        "properties": {
+          "limb_id": {"type": "string"},
+          "track_id": {"type": "string"},
+          "joint_names": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "first_frame": {"type": "integer", "minimum": 0},
+          "last_frame": {"type": "integer", "minimum": 0}
+        }
+      }
+    }
+  }
+}
