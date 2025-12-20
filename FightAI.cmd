@@ -18,13 +18,13 @@ if not exist "%APP_DIR%\runtime\python\python.exe" (
   echo   [3] Exit.
   echo.
   choice /c 123 /n /m "Choose 1, 2, or 3: "
-  if errorlevel 3 goto :end
+  if errorlevel 3 goto :error_exit
   if errorlevel 2 (
     start "" "%BASE_DIR%README.md"
-    goto :end
+    goto :error_exit
   )
   start "" "%APP_DIR%\runtime"
-  goto :end
+  goto :error_exit
 )
 
 "%APP_DIR%\runtime\python\python.exe" -m gso_app.entrypoint
@@ -39,18 +39,25 @@ if errorlevel 1 (
   echo   [4] Exit.
   echo.
   choice /c 1234 /n /m "Choose 1, 2, 3, or 4: "
-  if errorlevel 4 goto :end
+  if errorlevel 4 goto :error_exit
   if errorlevel 3 (
     start "" "%BASE_DIR%README.md"
-    goto :end
+    goto :error_exit
   )
   if errorlevel 2 (
     start "" "%APP_DIR%\app"
-    goto :end
+    goto :error_exit
   )
   start "" "%APP_DIR%\FightAI_Data"
-  goto :end
+  goto :error_exit
 )
+
+goto :end
+
+:error_exit
+  echo.
+  echo Press any key to close this window.
+  pause >nul
 
 :end
 endlocal
