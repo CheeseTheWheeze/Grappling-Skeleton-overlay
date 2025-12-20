@@ -32,11 +32,17 @@ If you already have the folder on your computer, skip to step 2.
 
    Tip: If you dragged the folder onto the terminal window, it will fill in the path for you.
 
-3. Run the installer:
+3. Run the installer (offline — no internet required):
+
+   **Option A: click to install**
+   - **Windows:** double‑click `install_gso.bat`
+   - **macOS:** double‑click `install_gso.command`
+   - **Linux:** double‑click `install_gso.sh`
+
+   **Option B: run from the terminal**
 
    ```bash
-   pip install -e .
-   gso install
+   python install_gso.py
    ```
 
 ✅ You should now see a **GSO Analyzer** icon on your Desktop.
@@ -91,10 +97,10 @@ gso gui
 ## Troubleshooting
 
 **“gso: command not found”**
-- Make sure you ran:
+- Run the installer again:
 
   ```bash
-  pip install -e .
+  python install_gso.py
   ```
 
 **Python version errors**

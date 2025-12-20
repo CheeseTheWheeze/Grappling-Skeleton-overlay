@@ -12,6 +12,7 @@ DEFAULT_CONFIG_DIR = Path.home() / ".gso"
 DEFAULT_REQUIREMENTS_PATH = Path(__file__).resolve().parents[2] / "requirements.txt"
 DEFAULT_DESKTOP_DIR = Path.home() / "Desktop"
 DEFAULT_DESKTOP_ENTRY_NAME = "GSO Analyzer"
+DEFAULT_WHEELHOUSE_DIR = Path(__file__).resolve().parents[2] / "vendor" / "wheels"
 
 
 def _format_version(version: Iterable[int]) -> str:
@@ -35,8 +36,21 @@ def install_requirements(
 ) -> None:
     if not requirements_path.exists():
         raise RuntimeError(f"Requirements file not found: {requirements_path}")
+    requirements_text = requirements_path.read_text(encoding="utf-8").strip()
+    if not requirements_text:
+        return
     python_executable = python_executable or sys.executable
-    command = [python_executable, "-m", "pip", "install", "-r", str(requirements_path)]
+    command = [
+        python_executable,
+        "-m",
+        "pip",
+        "install",
+        "--no-index",
+        "-r",
+        str(requirements_path),
+    ]
+    if DEFAULT_WHEELHOUSE_DIR.exists():
+        command.extend(["--find-links", str(DEFAULT_WHEELHOUSE_DIR)])
     result = subprocess.run(command, check=False)
     if result.returncode != 0:
         raise RuntimeError(
