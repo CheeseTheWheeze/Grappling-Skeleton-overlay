@@ -1,1 +1,0 @@
-"""Cross-video matching interfaces."""

@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Sequence
 
 from gso_app import installer
+from gso_app.gui import launch_gui
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -140,8 +141,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         return run_install(requirements_path, config_dir)
 
     if args.command == "gui":
-        from gso_app.gui import launch_gui
-
         config_path = Path(args.config).expanduser().resolve() if args.config else None
         return launch_gui(config_path=config_path)
 
