@@ -106,12 +106,19 @@ def run_install(requirements_path: Path, config_dir: Path) -> int:
         installer.install_requirements(requirements_path=requirements_path)
         print("Initializing assets/configuration...")
         final_config_dir = installer.initialize_assets(config_dir=config_dir)
+        print("Creating desktop launcher...")
+        desktop_entry = installer.create_desktop_launcher(
+            config_dir=final_config_dir,
+            requirements_path=requirements_path,
+        )
     except RuntimeError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
 
     print("Installation complete.")
     print(f"Configuration directory: {final_config_dir}")
+    if desktop_entry:
+        print(f"Desktop launcher created at: {desktop_entry}")
     return 0
 
 

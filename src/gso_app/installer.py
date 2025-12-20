@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -9,6 +10,8 @@ from typing import Iterable
 DEFAULT_MIN_PYTHON = (3, 9)
 DEFAULT_CONFIG_DIR = Path.home() / ".gso"
 DEFAULT_REQUIREMENTS_PATH = Path(__file__).resolve().parents[2] / "requirements.txt"
+DEFAULT_DESKTOP_DIR = Path.home() / "Desktop"
+DEFAULT_DESKTOP_ENTRY_NAME = "GSO Analyzer"
 
 
 def _format_version(version: Iterable[int]) -> str:
@@ -40,6 +43,96 @@ def install_requirements(
             "Requirement installation failed. Command: "
             + " ".join(command)
         )
+
+
+def _resolve_desktop_dir() -> Path | None:
+    xdg_dirs = Path.home() / ".config" / "user-dirs.dirs"
+    if xdg_dirs.exists():
+        for line in xdg_dirs.read_text(encoding="utf-8").splitlines():
+            stripped = line.strip()
+            if not stripped.startswith("XDG_DESKTOP_DIR"):
+                continue
+            _, _, value = stripped.partition("=")
+            value = value.strip().strip('"')
+            value = os.path.expandvars(value.replace("$HOME", str(Path.home())))
+            candidate = Path(value).expanduser()
+            return candidate
+    return DEFAULT_DESKTOP_DIR
+
+
+def _next_available_path(directory: Path, stem: str, suffix: str) -> Path:
+    candidate = directory / f"{stem}{suffix}"
+    if not candidate.exists():
+        return candidate
+    counter = 2
+    while True:
+        candidate = directory / f"{stem} ({counter}){suffix}"
+        if not candidate.exists():
+            return candidate
+        counter += 1
+
+
+def create_desktop_launcher(
+    *,
+    config_dir: Path = DEFAULT_CONFIG_DIR,
+    requirements_path: Path = DEFAULT_REQUIREMENTS_PATH,
+    python_executable: str | None = None,
+) -> Path | None:
+    desktop_dir = _resolve_desktop_dir()
+    if desktop_dir is None:
+        return None
+    desktop_dir.mkdir(parents=True, exist_ok=True)
+    config_dir.mkdir(parents=True, exist_ok=True)
+
+    python_executable = python_executable or sys.executable
+    launcher_script = config_dir / "gso_gui_launcher.py"
+    launcher_contents = "\n".join(
+        [
+            f"#!{python_executable}",
+            "from __future__ import annotations",
+            "",
+            "import sys",
+            "from pathlib import Path",
+            "",
+            "from gso_app import cli",
+            "from gso_app.gui import launch_gui",
+            "",
+            "def main() -> int:",
+            f"    requirements_path = Path(r\"{requirements_path}\")",
+            f"    config_dir = Path(r\"{config_dir}\")",
+            "    exit_code = cli.run_install(requirements_path, config_dir)",
+            "    if exit_code != 0:",
+            "        return exit_code",
+            "    return launch_gui()",
+            "",
+            "if __name__ == \"__main__\":",
+            "    raise SystemExit(main())",
+            "",
+        ]
+    )
+    launcher_script.write_text(launcher_contents, encoding="utf-8")
+    launcher_script.chmod(0o755)
+
+    desktop_entry_path = _next_available_path(
+        desktop_dir,
+        DEFAULT_DESKTOP_ENTRY_NAME,
+        ".desktop",
+    )
+    desktop_entry_name = desktop_entry_path.stem
+    desktop_entry_contents = "\n".join(
+        [
+            "[Desktop Entry]",
+            "Type=Application",
+            f"Name={desktop_entry_name}",
+            f"Exec={launcher_script}",
+            "Terminal=false",
+            "Categories=Utility;",
+            "",
+        ]
+    )
+    desktop_entry_path.write_text(desktop_entry_contents, encoding="utf-8")
+    desktop_entry_path.chmod(0o755)
+    return desktop_entry_path
 
 
 def initialize_assets(config_dir: Path = DEFAULT_CONFIG_DIR) -> Path:
