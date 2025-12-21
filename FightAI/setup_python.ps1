@@ -19,15 +19,18 @@ New-Item -ItemType Directory -Path $pythonRoot -Force | Out-Null
 
 $pythonZipName = "python-$PythonVersion-embed-$Architecture.zip"
 $pythonZipPath = Join-Path $baseDir $pythonZipName
+$pythonUrl = "https://www.python.org/ftp/python/$PythonVersion/$pythonZipName"
 if ($Architecture -eq "amd64") {
     $installerName = "python-$PythonVersion-amd64.exe"
 } else {
     $installerName = "python-$PythonVersion.exe"
 }
 $installerPath = Join-Path $baseDir $installerName
+$installerUrl = "https://www.python.org/ftp/python/$PythonVersion/$installerName"
 
 if (-not (Test-Path $pythonZipPath)) {
-    throw "Missing bundled runtime: $pythonZipName. Download the full FightAI bundle that includes the embedded Python 3.11 runtime."
+    Write-Host "Downloading Python embeddable runtime $PythonVersion..."
+    Invoke-WebRequest -Uri $pythonUrl -OutFile $pythonZipPath
 }
 
 Write-Host "Extracting Python runtime..."
@@ -64,7 +67,8 @@ function Install-TkinterRuntime {
     }
 
     if (-not (Test-Path $installerPath)) {
-        throw "Missing bundled installer: $installerName. Download the full FightAI bundle that includes the embedded Python 3.11 installer."
+        Write-Host "Downloading Python installer for Tkinter support..."
+        Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
     }
 
     Write-Host "Extracting Tkinter runtime from installer..."
