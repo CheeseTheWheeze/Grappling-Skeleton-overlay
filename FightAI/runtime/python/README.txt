@@ -1,2 +1,2 @@
-Place the Python embeddable runtime here so the portable app runs offline.
+The embedded Python runtime is downloaded automatically on first launch.
 Expected path: FightAI\runtime\python\python.exe
