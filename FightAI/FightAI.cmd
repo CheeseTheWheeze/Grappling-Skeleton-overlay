@@ -10,10 +10,10 @@ set "PYTHONUTF8=1"
 set "EMBEDDED_PYTHON=%BASE_DIR%runtime\python\python.exe"
 
 if not exist "%EMBEDDED_PYTHON%" (
-    echo Embedded Python not found. Bootstrapping runtime from bundled files...
+    echo Embedded Python not found. Bootstrapping runtime from bundled Python 3.11 files...
     powershell -NoProfile -ExecutionPolicy Bypass -File "%BASE_DIR%setup_python.ps1"
     if errorlevel 1 (
-        echo Failed to setup embedded Python. Ensure the Python embeddable zip and installer are bundled next to FightAI.cmd.
+        echo Failed to setup embedded Python. Ensure the full FightAI bundle includes Python 3.11 embeddable zip and installer next to FightAI.cmd.
     )
 )
 

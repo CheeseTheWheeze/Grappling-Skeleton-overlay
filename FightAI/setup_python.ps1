@@ -27,7 +27,7 @@ if ($Architecture -eq "amd64") {
 $installerPath = Join-Path $baseDir $installerName
 
 if (-not (Test-Path $pythonZipPath)) {
-    throw "Missing bundled runtime: $pythonZipName. Place it next to FightAI.cmd."
+    throw "Missing bundled runtime: $pythonZipName. Download the full FightAI bundle that includes the embedded Python 3.11 runtime."
 }
 
 Write-Host "Extracting Python runtime..."
@@ -64,7 +64,7 @@ function Install-TkinterRuntime {
     }
 
     if (-not (Test-Path $installerPath)) {
-        throw "Missing bundled installer: $installerName. Place it next to FightAI.cmd."
+        throw "Missing bundled installer: $installerName. Download the full FightAI bundle that includes the embedded Python 3.11 installer."
     }
 
     Write-Host "Extracting Tkinter runtime from installer..."
