@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, asdict
+import os
 from pathlib import Path
+import subprocess
+import sys
 from tkinter import BooleanVar, StringVar, Tk, messagebox
 from tkinter import filedialog, ttk
 
@@ -66,28 +69,46 @@ class GuiApp:
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
     def _build_layout(self) -> None:
-        self.root.title("GSO Analyzer")
+        self.root.title("FightAI Launcher")
         main = ttk.Frame(self.root, padding=16)
         main.grid(row=0, column=0, sticky="nsew")
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
 
-        ttk.Label(main, text="Input video").grid(row=0, column=0, sticky="w")
-        input_entry = ttk.Entry(main, textvariable=self.input_path, width=60)
-        input_entry.grid(row=1, column=0, sticky="ew", padx=(0, 8))
-        ttk.Button(main, text="Browse", command=self._browse_input).grid(
-            row=1, column=1, sticky="ew"
+        launcher_frame = ttk.LabelFrame(main, text="Launcher Tools", padding=12)
+        launcher_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
+        launcher_frame.columnconfigure(0, weight=1)
+        launcher_frame.columnconfigure(1, weight=1)
+
+        ttk.Button(launcher_frame, text="Open Data Folder", command=self._open_data_dir).grid(
+            row=0, column=0, sticky="ew", padx=(0, 8)
+        )
+        ttk.Button(launcher_frame, text="Open Logs Folder", command=self._open_logs_dir).grid(
+            row=0, column=1, sticky="ew"
+        )
+        ttk.Button(launcher_frame, text="Open Models Folder", command=self._open_models_dir).grid(
+            row=1, column=0, sticky="ew", padx=(0, 8), pady=(8, 0)
+        )
+        ttk.Button(launcher_frame, text="Open README", command=self._open_readme).grid(
+            row=1, column=1, sticky="ew", pady=(8, 0)
         )
 
-        ttk.Label(main, text="Output directory").grid(row=2, column=0, sticky="w", pady=(12, 0))
+        ttk.Label(main, text="Input video").grid(row=1, column=0, sticky="w", pady=(16, 0))
+        input_entry = ttk.Entry(main, textvariable=self.input_path, width=60)
+        input_entry.grid(row=2, column=0, sticky="ew", padx=(0, 8))
+        ttk.Button(main, text="Browse", command=self._browse_input).grid(
+            row=2, column=1, sticky="ew"
+        )
+
+        ttk.Label(main, text="Output directory").grid(row=3, column=0, sticky="w", pady=(12, 0))
         output_entry = ttk.Entry(main, textvariable=self.output_dir, width=60)
-        output_entry.grid(row=3, column=0, sticky="ew", padx=(0, 8))
+        output_entry.grid(row=4, column=0, sticky="ew", padx=(0, 8))
         ttk.Button(main, text="Browse", command=self._browse_output).grid(
-            row=3, column=1, sticky="ew"
+            row=4, column=1, sticky="ew"
         )
 
         options_frame = ttk.LabelFrame(main, text="Artifacts", padding=12)
-        options_frame.grid(row=4, column=0, columnspan=2, sticky="ew", pady=(16, 0))
+        options_frame.grid(row=5, column=0, columnspan=2, sticky="ew", pady=(16, 0))
         options_frame.columnconfigure(0, weight=1)
 
         ttk.Checkbutton(
@@ -107,13 +128,13 @@ class GuiApp:
         ).grid(row=2, column=0, sticky="w")
 
         action_frame = ttk.Frame(main)
-        action_frame.grid(row=5, column=0, columnspan=2, sticky="ew", pady=(16, 0))
+        action_frame.grid(row=6, column=0, columnspan=2, sticky="ew", pady=(16, 0))
         action_frame.columnconfigure(0, weight=1)
 
         ttk.Button(action_frame, text="Run / Generate", command=self._run).grid(
             row=0, column=0, sticky="e"
         )
-        ttk.Label(main, textvariable=self.status).grid(row=6, column=0, columnspan=2, sticky="w")
+        ttk.Label(main, textvariable=self.status).grid(row=7, column=0, columnspan=2, sticky="w")
 
         main.columnconfigure(0, weight=1)
 
@@ -126,6 +147,41 @@ class GuiApp:
         path = filedialog.askdirectory(title="Select output directory")
         if path:
             self.output_dir.set(path)
+
+    def _open_path(self, path: Path, label: str) -> None:
+        if not path.exists():
+            messagebox.showerror("Missing path", f"{label} does not exist:\n{path}")
+            return
+        try:
+            if sys.platform.startswith("win"):
+                os.startfile(path)  # type: ignore[attr-defined]
+            elif sys.platform == "darwin":
+                subprocess.run(["open", str(path)], check=False)
+            else:
+                subprocess.run(["xdg-open", str(path)], check=False)
+        except Exception as exc:
+            messagebox.showerror("Open failed", f"Could not open {label}:\n{exc}")
+
+    def _open_data_dir(self) -> None:
+        data_dir = self.config_path.parent
+        self._open_path(data_dir, "Data folder")
+
+    def _open_logs_dir(self) -> None:
+        logs_dir = self.config_path.parent / "logs"
+        logs_dir.mkdir(parents=True, exist_ok=True)
+        self._open_path(logs_dir, "Logs folder")
+
+    def _open_models_dir(self) -> None:
+        repo_root = Path(__file__).resolve().parents[2]
+        models_dir = repo_root / "models"
+        self._open_path(models_dir, "Models folder")
+
+    def _open_readme(self) -> None:
+        repo_root = Path(__file__).resolve().parents[2]
+        readme = repo_root / "README.txt"
+        if not readme.exists():
+            readme = repo_root / "README.md"
+        self._open_path(readme, "README")
 
     def _run(self) -> None:
         input_value = self.input_path.get().strip()
