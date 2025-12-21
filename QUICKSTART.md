@@ -3,14 +3,17 @@
 ## Launch the app
 
 1. Open the `FightAI/` folder.
-2. Run the launcher at [`FightAI/FightAI.cmd`](FightAI/FightAI.cmd).
+2. Run the launcher at [`FightAI/FightAI.vbs`](FightAI/FightAI.vbs) (or
+   [`FightAI/FightAI-debug.cmd`](FightAI/FightAI-debug.cmd) if you want a console).
 
 > **Required runtime path:** the launcher expects the embedded Python runtime at
 > `FightAI/runtime/python/python.exe`.
 
-If you have not downloaded the embedded runtime yet, run the bootstrap script at
-[`FightAI/tools/bootstrap_python.ps1`](FightAI/tools/bootstrap_python.ps1), then
-launch `FightAI/FightAI.cmd` again.
+On first launch, the bootstrapper downloads the runtime automatically. If the
+download fails, rerun [`FightAI/tools/bootstrap_python.ps1`](FightAI/tools/bootstrap_python.ps1).
+
+Every launch writes a log to your Desktop named `GrapplingPipelineCodexLog.txt`
+(overwrites on each run).
 
 ## Repository layout
 

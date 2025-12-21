@@ -1,39 +1,79 @@
+param(
+    [string]$LogPath = "$env:USERPROFILE\Desktop\GrapplingPipelineCodexLog.txt"
+)
+
+Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$fightAiRoot = Resolve-Path (Join-Path $scriptRoot "..")
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$pythonDir = Join-Path $fightAiRoot "runtime/python"
-$pythonExe = Join-Path $pythonDir "python.exe"
+$baseDir = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$runtimeDir = Join-Path $baseDir "runtime\python"
+$downloadDir = Join-Path $baseDir "runtime\_download"
+$pythonExe = Join-Path $runtimeDir "python.exe"
+
+if (-not [string]::IsNullOrWhiteSpace($LogPath)) {
+    "[{0}] Bootstrap start" -f (Get-Date) | Out-File -FilePath $LogPath -Encoding UTF8
+    "Base dir: $baseDir" | Out-File -FilePath $LogPath -Encoding UTF8 -Append
+    "Runtime: $pythonExe" | Out-File -FilePath $LogPath -Encoding UTF8 -Append
+}
 
 if (Test-Path $pythonExe) {
-    Write-Host "Python runtime already present at $pythonExe"
+    Write-Host "Embedded Python runtime already installed at $pythonExe"
+    if (-not [string]::IsNullOrWhiteSpace($LogPath)) {
+        "Runtime already present." | Out-File -FilePath $LogPath -Encoding UTF8 -Append
+    }
     exit 0
 }
 
-$downloadDir = Join-Path $fightAiRoot "runtime/_download"
-$zipName = "python-3.11.9-embed-amd64.zip"
-$zipPath = Join-Path $downloadDir $zipName
-$downloadUrl = "https://www.python.org/ftp/python/3.11.9/$zipName"
-
+New-Item -ItemType Directory -Force -Path $runtimeDir | Out-Null
 New-Item -ItemType Directory -Force -Path $downloadDir | Out-Null
 
-Write-Host "Downloading $downloadUrl"
-Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath
+$version = "3.11.9"
+$archSuffix = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "win32" }
+$zipName = "python-$version-embed-$archSuffix.zip"
+$zipPath = Join-Path $downloadDir $zipName
+$zipUrl = "https://www.python.org/ftp/python/$version/$zipName"
 
-if (Test-Path $pythonDir) {
-    Remove-Item -Recurse -Force $pythonDir
+if (-not (Test-Path $zipPath)) {
+    Write-Host "Downloading Python $version ($archSuffix) embeddable runtime..."
+    if (-not [string]::IsNullOrWhiteSpace($LogPath)) {
+        "Downloading runtime from $zipUrl" | Out-File -FilePath $LogPath -Encoding UTF8 -Append
+    }
+    Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath
+} else {
+    Write-Host "Using cached runtime download at $zipPath"
+    if (-not [string]::IsNullOrWhiteSpace($LogPath)) {
+        "Using cached runtime at $zipPath" | Out-File -FilePath $LogPath -Encoding UTF8 -Append
+    }
 }
 
-New-Item -ItemType Directory -Force -Path $pythonDir | Out-Null
+Write-Host "Extracting embedded runtime to $runtimeDir..."
+if (-not [string]::IsNullOrWhiteSpace($LogPath)) {
+    "Extracting runtime to $runtimeDir" | Out-File -FilePath $LogPath -Encoding UTF8 -Append
+}
+Expand-Archive -Path $zipPath -DestinationPath $runtimeDir -Force
 
-Write-Host "Extracting to $pythonDir"
-Expand-Archive -Path $zipPath -DestinationPath $pythonDir -Force
+Get-ChildItem -Path $runtimeDir -Filter "python*._pth" | ForEach-Object {
+    $pthPath = $_.FullName
+    $lines = Get-Content $pthPath
 
-if (Test-Path $pythonExe) {
-    Write-Host "Python runtime ready at $pythonExe"
-    exit 0
+    if ($lines -notcontains "..\\app") {
+        $lines += "..\\app"
+    }
+
+    if ($lines -notcontains "import site") {
+        $lines += "import site"
+    }
+
+    Set-Content -Path $pthPath -Value $lines -Encoding ASCII
 }
 
-Write-Error "Python runtime was not found after extraction."
-exit 1
+if (-not (Test-Path $pythonExe)) {
+    throw "Embedded Python runtime failed to install. Expected $pythonExe"
+}
+
+Write-Host "Embedded Python runtime installed successfully."
+if (-not [string]::IsNullOrWhiteSpace($LogPath)) {
+    "Embedded Python runtime installed successfully." | Out-File -FilePath $LogPath -Encoding UTF8 -Append
+}
