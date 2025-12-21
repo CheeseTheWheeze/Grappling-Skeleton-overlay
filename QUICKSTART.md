@@ -10,7 +10,8 @@
 > `FightAI/runtime/python/python.exe`.
 
 On first launch, the bootstrapper downloads the runtime automatically. If the
-download fails, rerun [`FightAI/tools/bootstrap_python.ps1`](FightAI/tools/bootstrap_python.ps1).
+download fails, the launcher falls back to a system Python (if available) and
+you can rerun [`FightAI/tools/bootstrap_python.ps1`](FightAI/tools/bootstrap_python.ps1).
 
 Every launch writes a log to your Desktop named `GrapplingPipelineCodexLog.txt`
 (overwrites on each run).

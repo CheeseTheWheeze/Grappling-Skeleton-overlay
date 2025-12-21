@@ -6,6 +6,9 @@ FightAI Portable
 2) On first launch, the embedded Python runtime is downloaded automatically to:
    FightAI\runtime\python\python.exe
 
+   If the embedded runtime cannot be installed, the launcher falls back to a
+   system Python (if available).
+
 3) Each launch writes a log to your Desktop named:
    GrapplingPipelineCodexLog.txt
 
