@@ -2,7 +2,7 @@
 setlocal
 
 set "BASE_DIR=%~dp0.."
-set "PS_SCRIPT=%BASE_DIR%tools\bootstrap_python.ps1"
+set "PS_SCRIPT=%BASE_DIR%\tools\bootstrap_python.ps1"
 
 where powershell.exe >nul 2>&1
 if errorlevel 1 (
