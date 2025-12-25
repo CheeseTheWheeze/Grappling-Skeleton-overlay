@@ -7,8 +7,7 @@ from core.inference import run_inference
 
 
 def main() -> int:
-    repo_root = Path(__file__).resolve().parents[2]
-    output_path = repo_root / "output"
+    output_path = Path("output")
     output_path.mkdir(exist_ok=True)
     frames = range(0, 30)
     pose_frames = run_inference(frames)
@@ -27,9 +26,8 @@ def main() -> int:
         }
         for frame in pose_frames
     ]
-    output_file = output_path / "pose_tracks.json"
-    output_file.write_text(json.dumps(serialized, indent=2))
-    print(f"Wrote pose tracks to {output_file}")
+    (output_path / "pose_tracks.json").write_text(json.dumps(serialized, indent=2))
+    print("Wrote pose tracks to output/pose_tracks.json")
     return 0
 
 

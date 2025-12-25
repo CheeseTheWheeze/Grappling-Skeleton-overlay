@@ -22,11 +22,3 @@ structure for the new model and training pipeline.
 
 Establish a Windows-first prototype that uses the shared `core/` inference module
 and prepare the API surface for future cross-platform usage.
-
-## Quick start
-
-```bash
-python apps/windows/main.py
-```
-
-This generates `output/pose_tracks.json` using the placeholder inference core.

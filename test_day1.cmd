@@ -12,11 +12,7 @@ if errorlevel 1 (
 python "%REPO_ROOT%tests/day1_validate.py"
 if errorlevel 1 (
   echo Day-1 validation failed.
-  echo.
-  pause
   exit /b 1
 )
 
 echo Day-1 test complete.
-echo.
-pause
