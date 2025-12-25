@@ -2,17 +2,11 @@ FightAI Portable (Windows)
 ==========================
 
 Download the repository ZIP from GitHub, unzip it, then open the `FightAI` folder
-and double-click `FightAI.vbs` (or `FightAI-debug.cmd` if you want a console).
+and double-click `FightAI.vbs` (or `FightAI.cmd` if you prefer a console).
 
 On first launch, the app automatically downloads and unpacks the embedded
-Python 3.11 runtime into `FightAI/runtime/python`. If the embedded runtime
-cannot be installed, the launcher falls back to a system Python (if available).
-
-Every launch writes a log to your Desktop named
-`GrapplingPipelineCodexLog.txt` (overwrites on each run).
-
-If the app still fails to launch, run `FightAI-repair.cmd` to repair the embedded
-runtime and update import paths.
+Python 3.11 runtime into `FightAI/runtime/python`. No manual Python install is
+required.
 
 ## Platform roadmap
 

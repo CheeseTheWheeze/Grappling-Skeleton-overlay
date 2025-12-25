@@ -4,4 +4,4 @@ Set fso = CreateObject("Scripting.FileSystemObject")
 scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
 cmdPath = Chr(34) & fso.BuildPath(scriptDir, "FightAI.cmd") & Chr(34)
 
-shell.Run cmdPath, 1, False
+shell.Run cmdPath, 0, False
