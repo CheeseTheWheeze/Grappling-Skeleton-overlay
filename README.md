@@ -1,17 +1,24 @@
-FightAI Portable (Windows)
-==========================
+# Grappling Skeleton Overlay - Clean Scaffold
 
-Download the repository ZIP from GitHub, unzip it, then open the `FightAI` folder
-and double-click `FightAI.vbs` (or `FightAI.cmd` if you prefer a console).
+This branch contains a clean, ground-up scaffold for a portable Windows app and a
+future API service. It intentionally removes legacy code to provide a fresh
+structure for the new model and training pipeline.
 
-On first launch, the app automatically downloads and unpacks the embedded
-Python 3.11 runtime into `FightAI/runtime/python`. No manual Python install is
-required.
+## Repository layout
 
-## Platform roadmap
+- `core/` — model loading, inference, tracking, smoothing
+- `adapters/` — video/file/API input adapters
+- `apps/windows/` — Windows entrypoint and packaging hooks
+- `apps/api/` — API wrapper (e.g., FastAPI) for inference
+- `training/` — dataset registry and master model pipeline
+- `packaging/` — build scripts for portable distributions
+- `docs/` — documentation
+- `scripts/` — automation scripts
+- `tests/` — test suite
+- `assets/` — static assets
+- `models/` — model weights and metadata
 
-- **Windows (today):** portable bundle with an embedded Python runtime.
-- **macOS (planned):** ship a signed `.app` bundle with Python embedded
-  (likely via PyInstaller/Nuitka).
-- **Mobile (planned):** package as a native wrapper with embedded runtime
-  and models (platform-specific).
+## Day 1 goal
+
+Establish a Windows-first prototype that uses the shared `core/` inference module
+and prepare the API surface for future cross-platform usage.
