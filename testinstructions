@@ -1,0 +1,19 @@
+Day-1 test instructions (copy/paste only)
+
+Windows (one-click):
+1) Copy/paste this command:
+   test_day1.cmd
+
+macOS/Linux (one-click):
+1) Copy/paste this command:
+   ./test_day1.sh
+
+What the test does:
+- Runs the Windows entrypoint to generate output/pose_tracks.json.
+- Validates the JSON schema and required fields.
+- Prints a success message if everything passes.
+
+Expected success output includes:
+- "Wrote pose tracks to" followed by a full path to output/pose_tracks.json
+- "Day-1 output validation passed"
+- "Day-1 test complete."
