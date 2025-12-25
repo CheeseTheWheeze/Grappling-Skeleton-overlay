@@ -1,11 +1,5 @@
 @echo off
 setlocal
-
-if "%~1"=="" (
-  start "" cmd /k "%~f0" --child
-  exit /b 0
-)
-
 set SCRIPT_DIR=%~dp0
 set REPO_ROOT=%SCRIPT_DIR%
 
@@ -18,11 +12,7 @@ if errorlevel 1 (
 python "%REPO_ROOT%tests/day1_validate.py"
 if errorlevel 1 (
   echo Day-1 validation failed.
-  echo.
-  pause
   exit /b 1
 )
 
 echo Day-1 test complete.
-echo.
-pause
